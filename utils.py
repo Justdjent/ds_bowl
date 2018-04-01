@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from pathlib import Path
+import copy
 
 import random
 import numpy as np
@@ -35,6 +36,7 @@ def train(args, model, criterion, train_loader, valid_loader, validation, init_o
 
     root = Path(args.root)
     model_path = root / 'model_{fold}.pt'.format(fold=fold)
+    best_model_path = root / 'best_model_{fold}.pt'.format(fold=fold)
     if model_path.exists():
         state = torch.load(str(model_path))
         epoch = state['epoch']
@@ -51,10 +53,17 @@ def train(args, model, criterion, train_loader, valid_loader, validation, init_o
         'step': step,
     }, str(model_path))
 
+    save_best = lambda ep: torch.save({
+        'model': best_model.state_dict(),
+        'epoch': ep,
+        'step': step,
+    }, str(best_model_path))
+
     report_each = 10
     log = root.joinpath('train_{fold}.log'.format(fold=fold)).open('at', encoding='utf8')
     valid_losses = []
     for epoch in range(epoch, n_epochs + 1):
+        min_val_loss = 10
         model.train()
         random.seed()
         tq = tqdm.tqdm(total=(len(train_loader) * args.batch_size))
@@ -84,6 +93,11 @@ def train(args, model, criterion, train_loader, valid_loader, validation, init_o
             valid_metrics = validation(model, criterion, valid_loader, num_classes)
             write_event(log, step, **valid_metrics)
             valid_loss = valid_metrics['valid_loss']
+            if valid_loss < min_val_loss:
+                min_val_loss = valid_loss
+                best_model = copy.deepcopy(model)
+                save_best(epoch + 1)
+                # print(min_val_loss)
             valid_losses.append(valid_loss)
         except KeyboardInterrupt:
             tq.close()
