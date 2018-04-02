@@ -95,15 +95,6 @@ def main():
 
     print('num train = {}, num_val = {}'.format(len(train_file_names), len(val_file_names)))
 
-    # train_transform = transforms.Compose([
-    #     # transforms.Scale(266),
-    #     # transforms.CenterCrop((400, 266)),
-    #     # transforms.RandomSizedCrop(224),
-    #     transforms.RandomHorizontalFlip(),
-    #     #transforms.ToTensor(),
-    #     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    # ])
-    #
     train_transform = DualCompose([
         HorizontalFlip(),
         VerticalFlip(),
