@@ -45,27 +45,30 @@ def validation_multi(model: nn.Module, criterion, valid_loader, num_classes):
         outputs = model(inputs)
         loss = criterion(outputs, targets)
         losses.append(loss.data[0])
-        output_classes = outputs.data.cpu().numpy().argmax(axis=1)
-        target_classes = targets.data.cpu().numpy()
-        confusion_matrix += calculate_confusion_matrix_from_arrays(
-            output_classes, target_classes, num_classes)
+        # output_classes = outputs.data.cpu().numpy().argmax(axis=1)
+        # target_classes = targets.data.cpu().numpy()
+        # confusion_matrix += calculate_confusion_matrix_from_arrays(
+        #     output_classes, target_classes, num_classes)
 
-    confusion_matrix = confusion_matrix[1:, 1:]  # exclude background
+    # confusion_matrix = confusion_matrix[1:, 1:]  # exclude background
     valid_loss = np.mean(losses)  # type: float
-    ious = {'iou_{}'.format(cls + 1): iou
-            for cls, iou in enumerate(calculate_iou(confusion_matrix))}
-
-    dices = {'dice_{}'.format(cls + 1): dice
-             for cls, dice in enumerate(calculate_dice(confusion_matrix))}
-
-    average_iou = np.mean(list(ious.values()))
-    average_dices = np.mean(list(dices.values()))
-
+    # ious = {'iou_{}'.format(cls + 1): iou
+    #         for cls, iou in enumerate(calculate_iou(confusion_matrix))}
+    #
+    # dices = {'dice_{}'.format(cls + 1): dice
+    #          for cls, dice in enumerate(calculate_dice(confusion_matrix))}
+    #
+    # average_iou = np.mean(list(ious.values()))
+    # average_dices = np.mean(list(dices.values()))
+    #
+    # print(
+    #     'Valid loss: {:.4f}, average IoU: {:.4f}, average Dice: {:.4f}'.format(valid_loss, average_iou, average_dices))
     print(
-        'Valid loss: {:.4f}, average IoU: {:.4f}, average Dice: {:.4f}'.format(valid_loss, average_iou, average_dices))
-    metrics = {'valid_loss': valid_loss, 'iou': average_iou}
-    metrics.update(ious)
-    metrics.update(dices)
+        'Valid loss: {:.4f}'.format(valid_loss))
+    # metrics = {'valid_loss': valid_loss, 'iou': average_iou}
+    metrics = {'valid_loss': valid_loss}
+    # metrics.update(ious)
+    # metrics.update(dices)
     return metrics
 
 

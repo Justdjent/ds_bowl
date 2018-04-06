@@ -52,10 +52,11 @@ class LossMulti:
             eps = 1e-15
             for cls in range(self.num_classes):
                 if cls == 0:
-                    jaccard_target = (targets[:,0,:,:] == cls).float()
+                    jaccard_target = (targets[:,0] == cls).float()
                 else:
-                    jaccard_target = (targets[:, cls-1, :, :] == 1).float()
-                jaccard_output = outputs[:, cls].exp()
+                    jaccard_target = (targets[:, cls-1] == 1).float()
+                # jaccard_output = outputs[:, cls].exp()
+                jaccard_output = F.sigmoid(outputs[:, cls])
                 intersection = (jaccard_output * jaccard_target).sum()
 
                 union = jaccard_output.sum() + jaccard_target.sum() + eps

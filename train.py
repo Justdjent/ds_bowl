@@ -117,6 +117,7 @@ def main():
     ])
 
     val_transform = DualCompose([
+        RandomCrop([128, 128]),
         ImageOnly(Normalize())
     ])
 
