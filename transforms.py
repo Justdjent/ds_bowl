@@ -164,6 +164,28 @@ class RandomCrop:
         return img, mask
 
 
+class Rescale:
+    def __init__(self, size):
+        self.h = size[0]
+        self.w = size[1]
+
+    def __call__(self, img, mask=None):
+        # height, width, _ = img.shape
+
+        # h_start = np.random.randint(0, height - self.h)
+        # w_start = np.random.randint(0, width - self.w)
+
+        img = cv2.resize(mask, (self.h, self.w), cv2.INTER_CUBIC)
+
+        # assert img.shape[0] == self.h
+        # assert img.shape[1] == self.w
+
+        if mask is not None:
+            mask = cv2.resize(mask, (self.h, self.w), cv2.INTER_CUBIC)
+
+        return img, mask
+
+
 class Shift:
     def __init__(self, limit=4, prob=.5):
         self.limit = limit

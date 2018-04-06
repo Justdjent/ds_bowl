@@ -24,10 +24,11 @@ from torch.nn import functional as F
 from transforms import (ImageOnly,
                         Normalize,
                         RandomCrop,
-                        DualCompose)
+                        DualCompose,
+                        Rescale)
 
 img_transform = DualCompose([
-    RandomCrop([128, 128]),
+    # RandomCrop([128, 128]),
     ImageOnly(Normalize())
 ])
 
@@ -87,7 +88,7 @@ def predict(model, from_file_names, batch_size: int, to_path, problem_type):
                 elif problem_type == 'parts':
                     # factor = prepare_data.parts_factor
                     factor = 255
-                    t_mask = (outputs[i][j].data.cpu().numpy().argmax(axis=0) * factor).astype(np.uint8)
+                    t_mask = (outputs[i][j].data.cpu().numpy() * factor).astype(np.uint8)
                 elif problem_type == 'instruments':
                     factor = prepare_data.instrument_factor
                     t_mask = (outputs[i].data.cpu().numpy().argmax(axis=0) * factor).astype(np.uint8)
@@ -121,7 +122,7 @@ if __name__ == '__main__':
     if args.fold == -1:
         for fold in [0, 1, 2, 3]:
             # _, file_names = get_split(fold)
-            file_names = os.listdir('data/stage1_test')
+            file_names = os.listdir('data/cropped_test')
             model = get_model(str(Path(args.model_path).joinpath('best_model_{fold}.pt'.format(fold=fold))),
                               model_type=args.model_type, problem_type=args.problem_type)
 
@@ -132,7 +133,7 @@ if __name__ == '__main__':
 
             predict(model, file_names, args.batch_size, output_path, problem_type=args.problem_type)
     else:
-        file_names = os.listdir('data/stage1_test')
+        file_names = os.listdir('data/cropped_test')
         # _, file_names = get_split(args.fold)
         model = get_model(str(Path(args.model_path).joinpath('best_model_{fold}.pt'.format(fold=args.fold))),
                           model_type=args.model_type, problem_type=args.problem_type)
