@@ -30,14 +30,13 @@ class NucleiDataset(Dataset):
             mask = load_mask(img_file_name, self.mode)
         else:
             mask = None
-        img, mask = self.transform(img)
+        img, mask = self.transform(img, mask)
 
         if self.mode == 'train':
             if self.problem_type == 'binary':
                 return to_float_tensor(img),\
                        torch.from_numpy(np.expand_dims(mask, 0)).float()
-                       # torch.from_numpy(np.expand_dims(seed, 0)).float(),\
-                       # torch.from_numpy(np.expand_dims(border, 0)).float()
+
             else:
                 # return to_float_tensor(img), torch.from_numpy(mask).long()
                 return to_float_tensor(img), to_float_tensor(mask)

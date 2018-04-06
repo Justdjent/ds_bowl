@@ -60,6 +60,7 @@ class LossMulti:
                 intersection = (jaccard_output * jaccard_target).sum()
 
                 union = jaccard_output.sum() + jaccard_target.sum() + eps
+                # print(cls_weight)
                 loss += (1 - intersection / (union - intersection)) * cls_weight
 
             loss /= (1 + self.jaccard_weight)

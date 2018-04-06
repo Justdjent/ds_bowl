@@ -20,6 +20,7 @@ from torch.nn import functional as F
 #                           original_width,
 #                           h_start, w_start
 #                           )
+from crop_utils import join_mask
 
 from transforms import (ImageOnly,
                         Normalize,
@@ -52,8 +53,10 @@ def get_model(model_path, model_type='unet11', problem_type='parts'):
     # elif model_type == 'UNet':
     model = TernausNet34(num_classes=num_classes)
 
-    # state = torch.load(str(model_path))
-    state = torch.load(str(model_path), map_location=lambda storage, loc: storage)
+    if torch.cuda.is_available():
+        state = torch.load(str(model_path))
+    else:
+        state = torch.load(str(model_path), map_location=lambda storage, loc: storage)
     state = {key.replace('module.', ''): value for key, value in state['model'].items()}
     model.load_state_dict(state)
 
@@ -108,7 +111,7 @@ def predict(model, from_file_names, batch_size: int, to_path, problem_type):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     arg = parser.add_argument
-    arg('--model_path', type=str, default='trained_models', help='path to model folder')
+    arg('--model_path', type=str, default='runs/debug', help='path to model folder')
     arg('--model_type', type=str, default='UNet11', help='network architecture',
         choices=['UNet', 'UNet11', 'UNet16', 'LinkNet34'])
     arg('--output_path', type=str, help='path to save images', default='output/mask')
@@ -144,3 +147,6 @@ if __name__ == '__main__':
         output_path.mkdir(exist_ok=True, parents=True)
 
         predict(model, file_names, args.batch_size, output_path, problem_type=args.problem_type)
+        imgs = os.listdir('data/stage1_test/')
+        [join_mask(128, img, 'output/mask/', 'output/joined_mask/', '0') for img in imgs]
+        utils.watershed()
