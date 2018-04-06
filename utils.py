@@ -5,6 +5,12 @@ import copy
 
 import random
 import numpy as np
+import cv2
+from scipy import ndimage as ndi
+
+from skimage.morphology import watershed
+import skimage
+from skimage.feature import peak_local_max
 
 import torch
 from torch.autograd import Variable
@@ -105,3 +111,28 @@ def train(args, model, criterion, train_loader, valid_loader, validation, init_o
             save(epoch)
             print('done.')
             return
+
+def calc_watershed(mask):
+    full_mask = mask[0]
+    seed = mask[1]
+    border = mask[2]
+
+    distance = ndi.distance_transform_edt(mask)
+    # local_maxi = peak_local_max(distance, indices=False, footprint=np.ones((3, 3)),
+    #                             labels=image)
+    ret, markers = cv2.connectedComponents((seed > 0.7).astype(np.int8))
+    # markers = ndi.label(local_maxi)[0]
+    labels = watershed(-distance, markers, mask=full_mask)
+    return labels
+
+def read_masks(id):
+    masks = "data/stage1_train_/{}/masks/*.png".format(id)
+    masks = skimage.io.imread_collection(masks).concatenate()
+    height, width = masks[0].shape
+    num_masks = masks.shape[0]
+
+    # Make a ground truth label image (pixel value is index of object label)
+    labels = np.zeros((height, width), np.uint16)
+    for index in range(0, num_masks):
+        labels[masks[index] > 0] = index + 1
+    return labels
