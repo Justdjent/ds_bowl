@@ -20,7 +20,7 @@ from torch.nn import functional as F
 #                           original_width,
 #                           h_start, w_start
 #                           )
-from crop_utils import join_mask
+# from crop_utils import join_mask
 
 from transforms import (ImageOnly,
                         Normalize,
@@ -91,7 +91,8 @@ def predict(model, from_file_names, batch_size: int, to_path, problem_type):
                 elif problem_type == 'parts':
                     # factor = prepare_data.parts_factor
                     factor = 255
-                    t_mask = (outputs[i][j].data.cpu().numpy() * factor).astype(np.uint8)
+                    t_mask = (F.sigmoid(outputs[i][j]).data.cpu().numpy() * factor).astype(np.uint8)
+                    # t_mask = (outputs[i][j].data.cpu().numpy() * factor).astype(np.uint8)
                 elif problem_type == 'instruments':
                     factor = prepare_data.instrument_factor
                     t_mask = (outputs[i].data.cpu().numpy().argmax(axis=0) * factor).astype(np.uint8)
@@ -115,7 +116,7 @@ if __name__ == '__main__':
     arg('--model_type', type=str, default='UNet11', help='network architecture',
         choices=['UNet', 'UNet11', 'UNet16', 'LinkNet34'])
     arg('--output_path', type=str, help='path to save images', default='output/mask')
-    arg('--batch-size', type=int, default=4)
+    arg('--batch-size', type=int, default=1)
     arg('--fold', type=int, default=0, choices=[0, 1, 2, 3, -1], help='-1: all folds')
     arg('--problem_type', type=str, default='parts', choices=['binary', 'parts', 'instruments'])
     arg('--workers', type=int, default=4)
@@ -147,6 +148,6 @@ if __name__ == '__main__':
         output_path.mkdir(exist_ok=True, parents=True)
 
         predict(model, file_names, args.batch_size, output_path, problem_type=args.problem_type)
-        imgs = os.listdir('data/stage1_test/')
-        [join_mask(128, img, 'output/mask/', 'output/joined_mask/', '0') for img in imgs]
-        utils.watershed()
+        # imgs = os.listdir('data/stage1_test/')
+        # [join_mask(128, img, 'output/mask/', 'output/joined_mask/', '0') for img in imgs]
+        # utils.watershed()

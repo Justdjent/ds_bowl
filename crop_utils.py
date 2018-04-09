@@ -57,7 +57,7 @@ def split_mask(step, image, save_folder):
     path = "data/stage1_test/{}/images/{}.png".format(image, image)
     mask = cv2.imread(path)
     print(mask.shape)
-    height, width, _ =  mask.shape
+    height, width, _ = mask.shape
     matrices = []
     cnt_h = 0
     while height > 0:
@@ -89,7 +89,7 @@ def split_mask(step, image, save_folder):
     print(len(matrices))
 
 
-if __name__ == "__name__":
+if __name__ == '__main__':
     # split
     imgs = os.listdir('data/stage1_test/')
     [split_mask(128, img, 'data/cropped_test/') for img in imgs]
