@@ -39,7 +39,7 @@ if __name__ == "__name__":
     test_pred_ids = []
     for n, id_ in enumerate(test_df['img_id']):
         # min_object_size = 20*test_df.loc[n,'img_height']*test_df.loc[n,'img_width']/(256*256)
-        mask = cv2.imread('output/processed_masks/{}'.format(id_), 0)
+        mask = cv2.imread('output/submission_mask/{}'.format(id_), 0)
         rle = list(mask_to_rle(mask))
         test_pred_rle.extend(rle)
         test_pred_ids.extend([id_]*len(rle))
