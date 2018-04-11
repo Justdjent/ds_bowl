@@ -30,6 +30,7 @@ from transforms import (ImageOnly,
 
 img_transform = DualCompose([
     # RandomCrop([128, 128]),
+    Rescale([128, 128]),
     ImageOnly(Normalize())
 ])
 
@@ -115,7 +116,7 @@ if __name__ == '__main__':
     arg('--model_path', type=str, default='runs/debug', help='path to model folder')
     arg('--model_type', type=str, default='UNet11', help='network architecture',
         choices=['UNet', 'UNet11', 'UNet16', 'LinkNet34'])
-    arg('--output_path', type=str, help='path to save images', default='output/mask')
+    arg('--output_path', type=str, help='path to save images', default='output/mask_resize')
     arg('--batch-size', type=int, default=1)
     arg('--fold', type=int, default=0, choices=[0, 1, 2, 3, -1], help='-1: all folds')
     arg('--problem_type', type=str, default='parts', choices=['binary', 'parts', 'instruments'])
@@ -126,7 +127,8 @@ if __name__ == '__main__':
     if args.fold == -1:
         for fold in [0, 1, 2, 3]:
             # _, file_names = get_split(fold)
-            file_names = os.listdir('data/cropped_test')
+            # file_names = os.listdir('data/cropped_test')
+            file_names = os.listdir('data/stage1_test')
             model = get_model(str(Path(args.model_path).joinpath('best_model_{fold}.pt'.format(fold=fold))),
                               model_type=args.model_type, problem_type=args.problem_type)
 
@@ -137,7 +139,8 @@ if __name__ == '__main__':
 
             predict(model, file_names, args.batch_size, output_path, problem_type=args.problem_type)
     else:
-        file_names = os.listdir('data/cropped_test')
+        # file_names = os.listdir('data/cropped_test')
+        file_names = os.listdir('data/stage1_test')
         # _, file_names = get_split(args.fold)
         model = get_model(str(Path(args.model_path).joinpath('best_model_{fold}.pt'.format(fold=args.fold))),
                           model_type=args.model_type, problem_type=args.problem_type)

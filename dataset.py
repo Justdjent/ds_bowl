@@ -51,7 +51,8 @@ def to_float_tensor(img):
 def load_image(path, mode):
     path_ = "data/stage1_train_/{}/images/{}.png".format(path, path)
     if mode != 'train':
-        path_ = "data/cropped_test/{}".format(path)
+        path_ = "data/stage1_test/{}/images/{}.png".format(path, path)
+        # path_ = "data/cropped_test/{}".format(path)
     if not os.path.isfile(path_):
         print('{} was empty'.format(path_))
     img = cv2.imread(str(path_))
