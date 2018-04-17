@@ -1,7 +1,7 @@
 import numpy as np
 import utils
 from torch import nn
-
+from torch.nn import functional as F
 
 def validation_binary(model: nn.Module, criterion, valid_loader, num_classes=None):
     model.eval()
@@ -37,38 +37,54 @@ def get_jaccard(y_true, y_pred):
 def validation_multi(model: nn.Module, criterion, valid_loader, num_classes):
     model.eval()
     losses = []
-    confusion_matrix = np.zeros(
-        (num_classes, num_classes), dtype=np.uint32)
+    jaccard = []
+    # confusion_matrix = np.zeros(
+    #     (num_classes, num_classes), dtype=np.uint32)
     for inputs, targets in valid_loader:
         inputs = utils.variable(inputs, volatile=True)
         targets = utils.variable(targets)
         outputs = model(inputs)
         loss = criterion(outputs, targets)
         losses.append(loss.data[0])
-        output_classes = outputs[:, 0].data.cpu().numpy().argmax(axis=1)
-        target_classes = targets[:, 0].data.cpu().numpy()
-        confusion_matrix += calculate_confusion_matrix_from_arrays(
-            output_classes, target_classes, num_classes)
+        for cls in range(num_classes):
+            if cls == 0:
+                jaccard_target = (targets[:, 0] == cls).float()
+            else:
+                jaccard_target = (targets[:, cls - 1] == 1).float()
+            # jaccard_output = outputs[:, cls].exp()
+
+            jaccard_output = F.sigmoid(outputs[:, cls])
+            jaccard += [get_jaccard(jaccard_target, jaccard_output)]
+        #     intersection = (jaccard_output * jaccard_target).sum()
+        #
+        #     union = jaccard_output.sum() + jaccard_target.sum() + eps
+        # output_classes = outputs[:, 0].data.cpu().numpy().argmax(axis=1)
+        # target_classes = targets[:, 0].data.cpu().numpy()
+        # confusion_matrix += calculate_confusion_matrix_from_arrays(
+        #     output_classes, target_classes, num_classes)
 
     # confusion_matrix = confusion_matrix[1:, 1:]  # exclude background
     valid_loss = np.mean(losses)  # type: float
-    ious = {'iou_{}'.format(cls + 1): iou
-            for cls, iou in enumerate(calculate_iou(confusion_matrix))}
+    valid_jaccard = np.mean(jaccard)
+    # ious = {'iou_{}'.format(cls + 1): iou
+    #         for cls, iou in enumerate(calculate_iou(confusion_matrix))}
+    #
+    # dices = {'dice_{}'.format(cls + 1): dice
+    #          for cls, dice in enumerate(calculate_dice(confusion_matrix))}
+    #
+    # average_iou = np.mean(list(ious.values()))
+    # average_dices = np.mean(list(dices.values()))
 
-    dices = {'dice_{}'.format(cls + 1): dice
-             for cls, dice in enumerate(calculate_dice(confusion_matrix))}
-
-    average_iou = np.mean(list(ious.values()))
-    average_dices = np.mean(list(dices.values()))
-
-    print(
-        'Valid loss: {:.4f}, average IoU: {:.4f}, average Dice: {:.4f}'.format(valid_loss, average_iou, average_dices))
+    # print(
+    #     'Valid loss: {:.4f}, average IoU: {:.4f}, average Dice: {:.4f}'.format(valid_loss, average_iou, average_dices))
     # print(
     #     'Valid loss: {:.4f}'.format(valid_loss))
-    metrics = {'valid_loss': valid_loss, 'iou': average_iou}
+    print('Valid loss: {:.5f}, jaccard: {:.5f}'.format(valid_loss, valid_jaccard.data[0]))
+    # metrics = {'valid_loss': valid_loss, 'iou': average_iou}
     # metrics = {'valid_loss': valid_loss}
-    metrics.update(ious)
-    metrics.update(dices)
+    metrics = {'valid_loss': valid_loss, 'jaccard_loss': valid_jaccard.data[0]}
+    # metrics.update(ious)
+    # metrics.update(dices)
     return metrics
 
 

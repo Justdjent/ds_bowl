@@ -51,8 +51,8 @@ def to_float_tensor(img):
 def load_image(path, mode):
     path_ = "data/stage1_train_/{}/images/{}.png".format(path, path)
     if mode != 'train':
-        path_ = "data/stage1_test/{}/images/{}.png".format(path, path)
-        # path_ = "data/cropped_test/{}".format(path)
+        # path_ = "data/stage1_test/{}/images/{}.png".format(path, path)
+        path_ = "data/cropped_test_2/{}".format(path)
     if not os.path.isfile(path_):
         print('{} was empty'.format(path_))
     img = cv2.imread(str(path_))
@@ -64,7 +64,7 @@ def load_image(path, mode):
 def load_mask(path, mode):
     path_ = "data/stage1_train_/{}/masksmask.png".format(path)
     if mode != 'train':
-        path_ = "data/stage1_test/{}/images/{}.png".format(path, path)
+        path_ = "data/stage2_test/{}/images/{}.png".format(path, path)
     if not os.path.isfile(path_):
         print('{} was empty'.format(path_))
     factor = prepare_data.binary_factor

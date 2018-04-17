@@ -43,7 +43,7 @@ def main():
     arg('--fold', type=int, help='fold', default=0)
     arg('--root', default='runs/debug', help='checkpoint root')
     arg('--batch-size', type=int, default=4)
-    arg('--n-epochs', type=int, default=100)
+    arg('--n-epochs', type=int, default=700)
     arg('--lr', type=float, default=0.0001)
     arg('--workers', type=int, default=8)
     arg('--type', type=str, default='parts', choices=['binary', 'parts', 'instruments'])
