@@ -563,3 +563,41 @@ def augment(x, mask=None, prob=0.5):
         ImageOnly(RandomContrast(limit=0.2, prob=0.5)),
         ImageOnly(RandomFilter(limit=0.5, prob=0.2)),
     ])(x, mask)
+
+def aug_mega_hardcore(prob=.95):
+    return Compose([
+        OneOf([
+            CLAHE(clipLimit=2, prob=.5),
+            IAASharpen(prob=.25),
+            IAAEmboss(prob=.25)
+        ], prob=.35),
+        OneOf([
+            IAAAdditiveGaussianNoise(prob=.3),
+            GaussNoise(prob=.7),
+        ], prob=.5),
+        ToGray(prob=.25),
+        InvertImg(prob=.2),
+        Remap(prob=.4),
+        RandomRotate90(),
+        Flip(),
+        Transpose(),
+        OneOf([
+            MotionBlur(prob=.2),
+            MedianBlur(blur_limit=3, prob=.3),
+            Blur(blur_limit=3, prob=.5),
+        ], prob=.4),
+        OneOf([
+            RandomContrast(prob=.5),
+            RandomBrightness(prob=.5),
+        ], prob=.4),
+        ShiftScaleRotate(shift_limit=.0, scale_limit=.45, rotate_limit=45, prob=.7),
+        OneOf([
+            Distort1(prob=.2),
+            Distort2(prob=.2),
+            ElasticTransform(prob=.2),
+            IAAPerspective(prob=.2),
+            IAAPiecewiseAffine(prob=.2),
+        ], prob=.6),
+        HueSaturationValue(prob=.5),
+        ChannelShuffle(prob=.2)
+    ], prob=prob)

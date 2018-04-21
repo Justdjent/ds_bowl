@@ -52,7 +52,7 @@ class LossMulti:
             eps = 1e-15
             for cls in range(self.num_classes):
                 if cls == 0:
-                    jaccard_target = (targets[:,0] == cls).float()
+                    jaccard_target = (targets[:, 0] == cls).float()
                 else:
                     jaccard_target = (targets[:, cls-1] == 1).float()
                 # jaccard_output = outputs[:, cls].exp()
@@ -62,7 +62,7 @@ class LossMulti:
                 union = jaccard_output.sum() + jaccard_target.sum() + eps
                 # print(cls_weight)
                 # loss += (1 - intersection / (union - intersection)) * cls_weight
-                loss += (1 - 2 * intersection / union)  * cls_weight
+                loss += torch.log(1 - 2 * intersection / union)  * cls_weight
 
-            loss /= (1 + self.jaccard_weight)
+            # loss /= (1 + self.jaccard_weight)
         return loss
